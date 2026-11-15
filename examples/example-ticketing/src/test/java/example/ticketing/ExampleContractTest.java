@@ -35,12 +35,12 @@ class ExampleContractTest {
         public void check() { }
         public Duration remaining() { return Duration.ofSeconds(5); }
     };
-    @Test void recognizesOnlyOwnedUrlSyntaxWithFixedSdkIssueGrammar() {
+    @Test void recognizesOnlyOwnedUrlSyntaxAndRejectsControlCharacters() {
         var definition = new ExampleDefinition();
         assertThat(definition.issueReference(URI.create("https://example.test/tickets/ex-12")))
                 .contains(new TicketProviderDefinition.IssueReference("EX-12", ""));
         assertThat(definition.issueReference(URI.create("https://example.test/browse/EX-12"))).isEmpty();
-        assertThatThrownBy(() -> new TicketProviderDefinition.IssueReference("arbitrary", ""))
+        assertThatThrownBy(() -> new TicketProviderDefinition.IssueReference("invalid\nreference", ""))
                 .isInstanceOf(IllegalArgumentException.class);
     }
     @Test void independentlyRegistersWithoutPrivateHostSources() {

@@ -4,7 +4,7 @@ import io.givops.adapters.ContextSigner;
 import io.givops.adapters.CredentialAccessException;
 import io.givops.adapters.CredentialLease;
 import io.givops.adapters.SdkCompatibility;
-import io.givops.ticketing.port.TicketProviderDefinition;
+import io.givops.adapters.ProviderDefinition;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -47,9 +47,9 @@ public final class AdapterTestkit {
         return new MutableCredentialLease(fields, destinations, accessRevision);
     }
 
-    public static void verifyDefinition(TicketProviderDefinition definition) {
+    public static void verifyDefinition(ProviderDefinition definition) {
         SdkCompatibility.requireCompatible(definition.sdkApiVersion());
-        if (definition.provider() == null || definition.displayName() == null || definition.displayName().isBlank()
+        if (definition.providerId() == null || definition.displayName() == null || definition.displayName().isBlank()
                 || definition.adapterId() == null || definition.adapterId().isBlank()
                 || definition.adapterVersion() == null || definition.adapterVersion().isBlank()
                 || definition.capabilities() == null || definition.apiProfiles() == null
