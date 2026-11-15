@@ -26,3 +26,5 @@ Core endpoint: GET `/api/v2/catalog/ticketing-providers` returns `{items:[{provi
 - `io.givops.adapters.testkit.AdapterTestkit.signer(String)` implements the documented length-prefixed HMAC using a synthetic key. `lease(Map<String,String>, Map<String,String>, String)` returns `MutableCredentialLease`, with `invalidate()` and `lastLocked()` for freshness tests. `verifyDefinition(TicketProviderDefinition)` checks descriptor basics and API compatibility.
 
 An absent adapter makes refresh/remote writes unavailable without deleting historical observations. Duplicate providers/adapters and incompatible API levels fail host startup. Inspection is explicit and read-only, scoped to instance/project/captured credentials; ordinary reads never require a metadata call.
+
+Credential descriptors declare at most 32 fields. Omit empty optional fields from the supplied fields map; retain nonempty values verbatim until provider validation normalizes them. The host does not echo generic credential values in metadata.
