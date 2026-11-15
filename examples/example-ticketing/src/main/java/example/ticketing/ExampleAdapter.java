@@ -22,6 +22,7 @@ public final class ExampleAdapter implements TicketProviderAdapter, TicketCapabi
     private final String productVersion;
     private final CapabilityInspection.State inspectionState;
     private int inspections;
+    private final ExamplePayload payload = ExamplePayload.packaged();
     public ExampleAdapter(CredentialHost credentials, ContextSigner signer, Clock clock, String productVersion,
                           CapabilityInspection.State inspectionState) {
         this.credentials = credentials; this.signer = signer; this.clock = clock;
@@ -52,14 +53,14 @@ public final class ExampleAdapter implements TicketProviderAdapter, TicketCapabi
         current(input.source(), captured, false);
         gate.check();
         return new ProviderSnapshot(input.projects().stream().map(query -> new ProjectResult(query.ticketProjectId(),
-                new ProjectObservation(query.externalProjectId(), query.projectKey(), query.projectKey(), input.source().baseUrl(), clock.instant()),
+                new ProjectObservation(query.externalProjectId(), query.projectKey(), payload.optionalName(query.projectKey()), input.source().baseUrl(), clock.instant()),
                 List.of(), List.of(), query.issueKeys(), new ReleaseMembership(ReleaseMappingState.NOT_REQUESTED, null, List.of(), clock.instant()))).toList());
     }
     @Override public CapabilityInspection inspect(InstanceSource source, String externalProjectId, String capability,
                                                 Access access, TicketRequestGate gate) {
         current(source, access, false); gate.check(); inspections++;
         var state = capability.equals("ticketing.read") ? inspectionState : CapabilityInspection.State.UNSUPPORTED;
-        return new CapabilityInspection(provider().name(), capability, state, ExampleMessages.format("example.synthetic"),
+        return new CapabilityInspection(provider().name(), capability, state, payload.optionalName(ExampleMessages.format("example.synthetic")),
                 productVersion, "example-rest-v1", access.context(), clock.instant());
     }
     public int inspections() { return inspections; }

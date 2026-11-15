@@ -4,3 +4,5 @@
 "example.credentials": "Example credentials are unavailable."
 "example.changed": "The example credential context changed."
 "example.synthetic": "Synthetic example inspection; no live product was queried."
+
+example.invalid.payload: "The synthetic example payload does not match this adapter mapping."

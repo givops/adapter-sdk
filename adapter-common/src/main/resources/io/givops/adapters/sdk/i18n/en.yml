@@ -10,3 +10,5 @@
 "sdk.ticketing.byte.budget.invalid": "The ticketing response limit exceeds the total byte budget."
 "sdk.ticketing.duration.invalid": "Invalid ticketing duration."
 "sdk.version.range.invalid": "The provider version range is invalid."
+
+sdk.reference.invalid: "The adapter issue reference is invalid."
