@@ -19,6 +19,16 @@ public interface TicketProviderDefinition {
     List<CredentialField> credentialFields();
     default String projectKeyPattern() { return null; }
     default String externalIdPattern() { return null; }
+    /** Optional URL syntax recognition only. The host retains origin, context, routing and budget checks. */
+    default Optional<IssueReference> issueReference(URI candidate) { return Optional.empty(); }
+    record IssueReference(String issueKey, String contextPath) {
+        public static final String KEY_PATTERN = "[A-Za-z][A-Za-z0-9_]{1,63}-[1-9][0-9]{0,18}";
+        public IssueReference {
+            if (issueKey == null || !issueKey.matches(KEY_PATTERN) || contextPath == null
+                    || !contextPath.matches("(?:/[A-Za-z0-9._-]+)*")) throw new IllegalArgumentException(io.givops.adapters.i18n.SdkMessages.format("sdk.reference.invalid"));
+            issueKey = issueKey.toUpperCase(java.util.Locale.ROOT);
+        }
+    }
     URI normalizeBaseUrl(URI value);
     void validateProject(String externalId, String projectKey);
     default void validateProjectKey(String projectKey) {

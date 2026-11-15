@@ -28,3 +28,5 @@ Core endpoint: GET `/api/v2/catalog/ticketing-providers` returns `{items:[{provi
 An absent adapter makes refresh/remote writes unavailable without deleting historical observations. Duplicate providers/adapters and incompatible API levels fail host startup. Inspection is explicit and read-only, scoped to instance/project/captured credentials; ordinary reads never require a metadata call.
 
 Credential descriptors declare at most 32 fields. Omit empty optional fields from the supplied fields map; retain nonempty values verbatim until provider validation normalizes them. The host does not echo generic credential values in metadata.
+
+URL reference recognition is optional via `TicketProviderDefinition.issueReference(URI): Optional<IssueReference>`. The nested record contains `issueKey` and `contextPath`; `KEY_PATTERN` is SDK 0.1's explicit issue-key grammar. Recognition must be local and side-effect free. The host checks configured origin, context path, project scope, ambiguity and budgets. Unsupported URL syntax is ignored; textual matching retains the documented key grammar.

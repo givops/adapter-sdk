@@ -23,6 +23,11 @@ public final class ExampleDefinition implements TicketProviderDefinition {
     }
     @Override public String projectKeyPattern() { return "[A-Z][A-Z0-9_]{1,63}"; }
     @Override public String externalIdPattern() { return "[A-Za-z0-9_-]{1,128}"; }
+    @Override public java.util.Optional<IssueReference> issueReference(URI candidate) {
+        if (candidate.getRawPath() == null) return java.util.Optional.empty();
+        var match = java.util.regex.Pattern.compile("/tickets/(" + IssueReference.KEY_PATTERN + ")").matcher(candidate.getRawPath());
+        return match.matches() ? java.util.Optional.of(new IssueReference(match.group(1), "")) : java.util.Optional.empty();
+    }
     @Override public URI normalizeBaseUrl(URI value) {
         if (value == null || !"https".equalsIgnoreCase(value.getScheme()) || value.getHost() == null
                 || value.getUserInfo() != null || value.getQuery() != null || value.getFragment() != null
