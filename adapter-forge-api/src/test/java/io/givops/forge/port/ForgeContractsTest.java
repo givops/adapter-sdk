@@ -9,6 +9,14 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class ForgeContractsTest {
+    @Test void canonicalLifecyclePreservesUnknownFutureValues() {
+        var mapper = tools.jackson.databind.json.JsonMapper.builder().build();
+        assertThat(mapper.readValue("\"FUTURE\"", io.givops.forge.model.ChangeRequestLifecycle.class))
+                .isEqualTo(io.givops.forge.model.ChangeRequestLifecycle.UNKNOWN);
+        assertThat(mapper.readValue("\"OPEN\"", io.givops.forge.model.ChangeRequestLifecycle.class))
+                .isEqualTo(io.givops.forge.model.ChangeRequestLifecycle.OPEN);
+    }
+
     @Test void openProviderIdentityHasValueEqualityAndRejectsInvalidNames() {
         assertThat(ForgeProvider.valueOf("CUSTOM_FORGE")).isEqualTo(ForgeProvider.valueOf("CUSTOM_FORGE"));
         assertThatThrownBy(() -> ForgeProvider.valueOf("bad-name")).isInstanceOf(IllegalArgumentException.class);
