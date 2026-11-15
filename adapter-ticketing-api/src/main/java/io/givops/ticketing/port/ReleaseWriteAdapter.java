@@ -20,12 +20,17 @@ public interface ReleaseWriteAdapter extends AutoCloseable {
     @Override default void close() { }
     class WriteFailure extends RuntimeException {
         private final String code; private final boolean uncertain;
+        private final io.givops.adapters.FailureCategory category;
         public WriteFailure(String code, boolean uncertain) {
             this(code, uncertain, io.givops.adapters.i18n.SdkMessages.format("sdk.release.unconfirmed"));
         }
         public WriteFailure(String code, boolean uncertain, String safeMessage) {
-            super(safeMessage); this.code = code; this.uncertain = uncertain;
+            this(code, uncertain, safeMessage, io.givops.adapters.FailureCategory.UNKNOWN);
         }
+        public WriteFailure(String code, boolean uncertain, String safeMessage, io.givops.adapters.FailureCategory category) {
+            super(safeMessage); this.code = code; this.uncertain = uncertain; this.category = java.util.Objects.requireNonNull(category);
+        }
+        public io.givops.adapters.FailureCategory category() { return category; }
         public String code() { return code; }
         public boolean uncertain() { return uncertain; }
     }
