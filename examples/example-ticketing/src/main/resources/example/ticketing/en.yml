@@ -1,0 +1,6 @@
+"example.name": "Example tickets"
+"example.token": "API token"
+"example.invalid": "The example provider configuration is invalid."
+"example.credentials": "Example credentials are unavailable."
+"example.changed": "The example credential context changed."
+"example.synthetic": "Synthetic example inspection; no live product was queried."
