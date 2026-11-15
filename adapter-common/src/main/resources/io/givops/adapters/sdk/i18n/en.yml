@@ -12,3 +12,11 @@
 "sdk.version.range.invalid": "The provider version range is invalid."
 
 sdk.reference.invalid: "The adapter issue reference is invalid."
+
+forge.forgeAdapter.exact.branch.pipeline.observations.are.unavailable.for.this.provider: 'Exact branch pipeline observations are unavailable for this provider.'
+
+forge.discoveryValues.sha256.unavailable: 'SHA-256 is unavailable.'
+
+forge.discoveryValues.a.canonical.positive.numeric.forge.id.is.required: 'A canonical positive numeric forge ID is required.'
+
+forge.forgeProperties.invalid.forge.resource.limits: 'Invalid forge resource limits'

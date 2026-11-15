@@ -56,16 +56,30 @@ public final class TicketModels {
                                      URI webUrl, Instant observedAt) { }
 
     public record VersionObservation(String externalVersionId, String name, boolean released, boolean archived,
-                                     LocalDate releaseDate, Instant observedAt) { }
+                                     LocalDate releaseDate, Instant observedAt, String nativeState,
+                                     LocalDate startDate, Instant closedAt) {
+        public VersionObservation(String externalVersionId, String name, boolean released, boolean archived,
+                                  LocalDate releaseDate, Instant observedAt) {
+            this(externalVersionId, name, released, archived, releaseDate, observedAt, null, null, null);
+        }
+    }
 
     public record IssueIdentity(String externalProjectId, String externalIssueId) { }
 
     public record IssueObservation(IssueIdentity identity, String issueKey, String summary, String type, String status,
                                    String statusCategory, String priority, String resolution, Instant createdAt,
                                    Instant updatedAt, Instant resolvedAt, List<String> releaseVersionIds,
-                                   URI webUrl, Instant observedAt, String assigneeAccountId) {
+                                   URI webUrl, Instant observedAt, String assigneeAccountId, String description, List<String> labels) {
         public IssueObservation {
             releaseVersionIds = List.copyOf(releaseVersionIds);
+            labels = labels == null ? List.of() : List.copyOf(labels);
+        }
+        public IssueObservation(IssueIdentity identity, String issueKey, String summary, String type, String status,
+                                String statusCategory, String priority, String resolution, Instant createdAt,
+                                Instant updatedAt, Instant resolvedAt, List<String> releaseVersionIds,
+                                URI webUrl, Instant observedAt, String assigneeAccountId) {
+            this(identity, issueKey, summary, type, status, statusCategory, priority, resolution, createdAt,
+                    updatedAt, resolvedAt, releaseVersionIds, webUrl, observedAt, assigneeAccountId, null, List.of());
         }
         public IssueObservation(IssueIdentity identity, String issueKey, String summary, String type, String status,
                                 String statusCategory, String priority, String resolution, Instant createdAt,

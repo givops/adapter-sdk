@@ -15,7 +15,7 @@ public final class ExampleDefinition implements TicketProviderDefinition {
     @Override public TicketProvider provider() { return PROVIDER; }
     @Override public String displayName() { return ExampleMessages.format("example.name"); }
     @Override public String adapterId() { return "io.givops.example.ticketing"; }
-    @Override public String adapterVersion() { return "0.1.0-SNAPSHOT"; }
+    @Override public String adapterVersion() { return "0.2.0-SNAPSHOT"; }
     @Override public List<String> capabilities() { return List.of("ticketing.read"); }
     @Override public List<String> apiProfiles() { return List.of("example-rest-v1"); }
     @Override public List<CredentialField> credentialFields() {
@@ -26,7 +26,7 @@ public final class ExampleDefinition implements TicketProviderDefinition {
     @Override public java.util.Optional<IssueReference> issueReference(URI candidate) {
         if (candidate.getRawPath() == null) return java.util.Optional.empty();
         var match = java.util.regex.Pattern.compile("/tickets/(" + IssueReference.KEY_PATTERN + ")").matcher(candidate.getRawPath());
-        return match.matches() ? java.util.Optional.of(new IssueReference(match.group(1), "")) : java.util.Optional.empty();
+        return match.matches() ? java.util.Optional.of(new IssueReference(match.group(1).toUpperCase(java.util.Locale.ROOT), "")) : java.util.Optional.empty();
     }
     @Override public URI normalizeBaseUrl(URI value) {
         if (value == null || !"https".equalsIgnoreCase(value.getScheme()) || value.getHost() == null

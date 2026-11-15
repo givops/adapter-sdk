@@ -2,7 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 mkdir -p dist
-for module in adapter-common adapter-ticketing-api adapter-spring-boot adapter-testkit; do
+for module in adapter-common adapter-forge-api adapter-ticketing-api adapter-spring-boot adapter-testkit; do
   cp "$module"/target/*.jar dist/
   cp "$module/pom.xml" "dist/$module.pom"
 done
