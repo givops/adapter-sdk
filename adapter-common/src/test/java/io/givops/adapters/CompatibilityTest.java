@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 
 class CompatibilityTest {
     @Test void experimentalSdkApiRequiresExactLevel() {
-        SdkCompatibility.requireCompatible("0.3");
-        for (String incompatible : new String[]{"0", "0.1", "0.2", "1.0", "0.1.1", "17", "19", null})
+        SdkCompatibility.requireCompatible("0.5");
+        for (String incompatible : new String[]{"0", "0.1", "0.2", "0.3", "0.4", "1.0", "0.1.1", "17", "19", null})
             assertThatThrownBy(() -> SdkCompatibility.requireCompatible(incompatible)).isInstanceOf(IllegalArgumentException.class);
     }
     @Test void numericRangesDoNotCompareLexicallyOrInferFeatures() {
