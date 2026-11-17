@@ -41,6 +41,20 @@ Host-managed credential storage retains its 32 KiB encrypted envelope limit. The
 
 `ForgeProviderDefinition` supplies hosting modes/default, repository identity validation, path and external-ID patterns, and an optional `commitPathTemplate` containing `{sha}`. `TicketProviderDefinition.commandLabels` describes native creation inputs/resources. `createProjectKeyPattern` and `validateCreateProjectKey` describe new-project slugs independently of bound project paths. The frontend uses these descriptors without provider-name branches.
 
+`ForgeGroupHierarchyAdapter` is an additive, optional capability (`forge.group-hierarchy`),
+independent of `ForgeDiscoveryAdapter` project/group support. `supports(provider, hosting)`
+declares implementation support without I/O. `subgroups(server, access, parentExternalId,
+query, limit, page, lastId, gate)` returns only direct children using the existing
+`RemotePage<RemoteGroup>` model; a partial page does not establish complete ancestry.
+`group(server, access, externalId, gate)` reads known ancestry metadata: the host must
+derive the ID from an admitted project/group or a preceding parent result in the same
+server/credential context, enforce traversal depth/object budgets, reject cycles and
+verify the complete path. It must never expose this method as arbitrary public-group
+ID discovery. Ancestor readability is not proof of membership. Providers independently
+enforce authenticated collection scope and project import eligibility; the host owns
+local group mappings, inherited-access policy and transactional import. No existing
+discovery/import DTO or required adapter method changes; API compatibility remains 0.2.
+
 `VersionObservation.nativeState`, `startDate` and `closedAt` preserve native milestone state. `releaseDate` is the native due date for milestone providers; a closed milestone must not automatically become released. `IssueObservation.description` and `labels` preserve available native issue metadata. The external issue ID is globally unique and stable within the configured instance; adapters without native global IDs must qualify it. The project ID describes current membership, preserving Jira identity across project moves. Local issue numbers remain scoped in issueKey.
 
 `FailureCategory` carries provider-authored access-denial, retry and unsupported semantics. `ForgeException(code,status,message,category)` and `ReleaseWriteAdapter.WriteFailure(code,uncertain,message,category)` let the private host revoke stale access or classify retry without parsing vendor error codes. In particular, an adapter decides whether a remote 404 constitutes access denial. Provider error codes remain opaque diagnostics. Existing constructors remain source and binary compatible; supply explicit categories when host HTTP status differs from the remote cause.
