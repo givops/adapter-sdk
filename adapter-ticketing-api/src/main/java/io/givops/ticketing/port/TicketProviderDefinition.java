@@ -18,6 +18,17 @@ public interface TicketProviderDefinition extends io.givops.adapters.ProviderDef
     List<String> capabilities();
     List<String> apiProfiles();
     List<CredentialField> credentialFields();
+    /** Source kinds supported by this provider; repository sources never require a fabricated API URL. */
+    default List<String> sourceKinds() { return List.of("HOSTED_SERVICE"); }
+    default void validateRepositorySource(io.givops.ticketing.model.TicketModels.RepositorySource source) {
+        if (source == null || !sourceKinds().contains("REPOSITORY_SNAPSHOT"))
+            throw new IllegalArgumentException("Repository source is unsupported.");
+    }
+    /** Receives one complete bounded lexical candidate, never a numeric-prefix truncation. */
+    default Optional<String> normalizeReferenceCandidate(String candidate) {
+        return candidate != null && candidate.matches(IssueReference.KEY_PATTERN)
+                ? Optional.of(candidate.toUpperCase(java.util.Locale.ROOT)) : Optional.empty();
+    }
     default Map<String, String> commandLabels() { return Map.of(); }
     default String projectKeyPattern() { return null; }
     default String createProjectKeyPattern() { return projectKeyPattern(); }

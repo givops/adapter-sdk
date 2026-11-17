@@ -59,6 +59,21 @@ public final class AdapterTestkit {
                 != definition.credentialFields().size()) throw new AssertionError("Duplicate provider descriptor entries.");
     }
 
+    /** Checks revision/content/manifest coherence without retaining text or reading asset bytes. */
+    public static void verifyBrowserContent(io.givops.ticketing.model.TicketBrowserModels.TicketContent content,
+                                            io.givops.ticketing.model.TicketBrowserModels.TicketSummary summary) {
+        if (!content.ref().equals(summary.ref()) || !content.revision().equals(summary.revision()))
+            throw new AssertionError("Browser document does not match its summary revision.");
+        var assets = content.assets().stream().map(io.givops.ticketing.model.TicketBrowserModels.AssetRef::id).collect(java.util.stream.Collectors.toSet());
+        for (var asset : content.assets()) {
+            if (asset.id() == null || asset.id().isBlank() || asset.digest() == null || asset.digest().isBlank()
+                    || asset.size() > 10 * 1024 * 1024) throw new AssertionError("Incomplete or oversized manifest asset.");
+        }
+        for (var link : content.links()) {
+            if (link.assetId() != null && !assets.contains(link.assetId())) throw new AssertionError("Manifest link targets an undeclared asset.");
+        }
+    }
+
     public static final class MutableCredentialLease implements CredentialLease {
         private final Map<String, String> fields;
         private final Map<String, String> destinations;

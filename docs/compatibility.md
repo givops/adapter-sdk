@@ -1,6 +1,6 @@
 # Compatibility and scoped capabilities
 
-The SDK API level is `0.2`. During experimental `0.x` releases, the host requires an exact API-level match; `0.1` is incompatible even though its major is also zero. The SDK artifact version (`0.2.0-SNAPSHOT`) and adapter artifact version are independent release identifiers.
+The SDK API level is `0.3`. During experimental `0.x` releases, the host requires an exact API-level match; `0.1` and `0.2` are incompatible even though its major is also zero. The SDK artifact version (`0.3.0-SNAPSHOT`) and adapter artifact version are independent release identifiers.
 
 A provider product version describes a remote installation, while an API profile identifies the dialect implemented by an adapter. Neither is an SDK version. `ProviderVersion` compares parsed numeric components (`17.10` is newer than `17.9`); unrecognized vendor syntax remains unknown until the adapter normalizes it. `ProviderVersionRange` is a lower-inclusive, upper-exclusive comparison helper, not evidence that a feature exists.
 
@@ -32,3 +32,15 @@ feature boundaries and scoped evidence, including permissions and enabled featur
 rather than equating a product major with every available capability. Unknown
 metadata must remain unknown. Do not retry a mutation blindly after an ambiguous
 response or interpret access denial as proof that the feature does not exist.
+
+## The 0.3 boundary
+
+Version 0.3 adds optional read-only browser/content/asset/navigation capabilities,
+repository source configuration and a host repository-content port. It preserves
+hosted source constructors and existing observation constructors for source rebuilds,
+adds nullable observation source provenance, and deprecates ticket descriptions
+inside observations. Rebuild all installed providers with the host and SDK at the
+exact 0.3 API level. Forge merge-request descriptions and existing write operations
+retain their behavior. Existing providers may remain observation/navigation-only;
+new optional ports do not require vendor feature parity. See the frozen signatures
+and operational rules in [CONTRACT.md](../CONTRACT.md).

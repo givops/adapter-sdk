@@ -1,8 +1,8 @@
-# Adapter SDK 0.2 contract
+# Adapter SDK 0.3 contract
 
 Java 25, Spring Boot 4.0.9 and its Jackson 3 baseline. Public types retain their existing package names to avoid unnecessary model remapping. All public modules build without GivOps private source.
 
-Providers depend on `io.givops:adapter-spring-boot:0.2.0-SNAPSHOT`. It exposes `adapter-ticketing-api`, `adapter-forge-api` and `adapter-common` transitively. Use Boot `AutoConfiguration.imports` to register a `TicketProviderDefinition` bean and capability beans (`TicketProviderAdapter`, optional `TicketWriteAdapter`, `TestReportProviderAdapter`, `ReleaseWriteAdapter`). Declare only implemented capabilities. Bean definitions must work without component scanning from the host. Publish the definition independently of runtime credential availability.
+Providers depend on `io.givops:adapter-spring-boot:0.3.0-SNAPSHOT`. It exposes `adapter-ticketing-api`, `adapter-forge-api` and `adapter-common` transitively. Use Boot `AutoConfiguration.imports` to register a `TicketProviderDefinition` bean and capability beans (`TicketProviderAdapter`, optional `TicketWriteAdapter`, `TestReportProviderAdapter`, `ReleaseWriteAdapter`). Declare only implemented capabilities. Bean definitions must work without component scanning from the host. Publish the definition independently of runtime credential availability.
 
 The host supplies `io.givops.adapters.CredentialHost`, `ContextSigner`, `Clock`, `JsonMapper`, `TicketProperties` and `TestReportProperties`. Adapter configuration may use its own public `@ConfigurationProperties` types. Host services never import provider concrete types.
 
@@ -18,7 +18,7 @@ Core endpoint: GET `/api/v2/catalog/ticketing-providers` returns `{items:[{provi
 
 `TicketProviderAdapter.current(InstanceSource, Access, boolean locked)` is required; implement it explicitly using the captured host lease. A context-only comparison is insufficient for locked publication.
 
-- `TicketProviderDefinition.sdkApiVersion(): String` defaults to `"0.2"`. The host calls `SdkCompatibility.requireCompatible(String)` and accepts this exact API level. This replaces the draft `sdkMajor()`; adapter artifact versions remain independent.
+- `TicketProviderDefinition.sdkApiVersion(): String` defaults to `"0.3"`. The host calls `SdkCompatibility.requireCompatible(String)` and accepts this exact API level. This replaces the draft `sdkMajor()`; adapter artifact versions remain independent.
 - `CredentialHost.capture(CredentialRequest)` and `CredentialLease.requireCurrent(boolean)` report expected host failures as `io.givops.adapters.CredentialAccessException`, with a public no-argument constructor and no private cause. Capture maps to provider `MISSING_CREDENTIALS`; revalidation maps to `SUPERSEDED`. Unexpected runtime failures are not caught indiscriminately.
 - `io.givops.adapters.i18n.MessageCatalog.load(Class<?> resourceOwner, String absoluteResourcePath)` loads one explicit artifact-owned YAML resource. `load(Map<String, InputStream>)`, `format(String, Map<String, ?>)` and `patterns()` are also public. Each adapter owns its facade and a unique resource path, for example `/io/givops/adapters/jira/i18n/en.yml`. Never import private `io.givops.i18n.Messages` or package the core catalog/index. English fallback, strict MF1 and cloned concurrent formatters are preserved. Provider queries are protocol constants, not translated messages.
 - `ReleaseWriteAdapter.WriteFailure(String code, boolean uncertain, String safeMessage)` permits adapter-owned sanitized text; the two-argument constructor remains available with an SDK message.
@@ -35,12 +35,99 @@ Host-managed credential storage retains its 32 KiB encrypted envelope limit. The
 
 ## Forge and shared registration
 
-`ProviderDefinition` owns artifact metadata, API profiles, credential fields and destination normalization. A combined JAR registers one `TicketProviderDefinition` and one `ForgeProviderDefinition`, with the same provider and artifact IDs. Its single `META-INF/givops-adapter.properties` declares `domains=ticketing,forge`, `sdkApiVersion=0.2`, and the provider, adapter ID and artifact version. Each declared domain must have exactly one registered definition. SDK 0.1 binaries are rejected.
+`ProviderDefinition` owns artifact metadata, API profiles, credential fields and destination normalization. A combined JAR registers one `TicketProviderDefinition` and one `ForgeProviderDefinition`, with the same provider and artifact IDs. Its single `META-INF/givops-adapter.properties` declares `domains=ticketing,forge`, `sdkApiVersion=0.3`, and the provider, adapter ID and artifact version. Each declared domain must have exactly one registered definition. SDK 0.1 and 0.2 binaries are rejected.
 
 `ForgeProvider` is an open value identity. `ForgeAdapter`, `ForgeDiscoveryAdapter`, `ForgeApiProbe`, `ForgeRepositoryIdentity`, `ForgeCapabilityInspector` and `PipelineCommandProvider` are independently registered public capabilities. Their model packages are retained. `ForgeAdapter.Access` contains ephemeral credential fields and hosting; all remote requests require the supplied gate. Provider authentication header construction belongs only in the adapter. The core owns credentials, admission, freshness, snapshots and transactions. Canonical lifecycle/CI/conflict/reviewer metadata must be supplied by the adapter; the host does not infer it from vendor raw strings.
 
 `ForgeProviderDefinition` supplies hosting modes/default, repository identity validation, path and external-ID patterns, and an optional `commitPathTemplate` containing `{sha}`. `TicketProviderDefinition.commandLabels` describes native creation inputs/resources. `createProjectKeyPattern` and `validateCreateProjectKey` describe new-project slugs independently of bound project paths. The frontend uses these descriptors without provider-name branches.
 
-`VersionObservation.nativeState`, `startDate` and `closedAt` preserve native milestone state. `releaseDate` is the native due date for milestone providers; a closed milestone must not automatically become released. `IssueObservation.description` and `labels` preserve available native issue metadata. The external issue ID is globally unique and stable within the configured instance; adapters without native global IDs must qualify it. The project ID describes current membership, preserving Jira identity across project moves. Local issue numbers remain scoped in issueKey.
+`VersionObservation.nativeState`, `startDate` and `closedAt` preserve native milestone state. `releaseDate` is the native due date for milestone providers; a closed milestone must not automatically become released. `IssueObservation.labels` preserves available native metadata. The deprecated `description` component is retained only for source migration; observation adapters must supply null and hosts must discard legacy values at read/persistence boundaries. Full ticket narratives belong exclusively in transient browser content. Forge merge-request descriptions are unchanged. The external issue ID is globally unique and stable within the configured instance; adapters without native global IDs must qualify it. The project ID describes current membership, preserving Jira identity across project moves. Local issue numbers remain scoped in issueKey.
 
 `FailureCategory` carries provider-authored access-denial, retry and unsupported semantics. `ForgeException(code,status,message,category)` and `ReleaseWriteAdapter.WriteFailure(code,uncertain,message,category)` let the private host revoke stale access or classify retry without parsing vendor error codes. In particular, an adapter decides whether a remote 404 constitutes access denial. Provider error codes remain opaque diagnostics. Existing constructors remain source and binary compatible; supply explicit categories when host HTTP status differs from the remote cause.
+
+## Frozen read-only browser API (0.3)
+
+API 0.3 requires an exact host/SDK/adapter rebuild; existing API 0.2 binaries are
+incompatible. Old observation constructors remain source-compatible. The current
+artifact version is 0.3.0-SNAPSHOT and does not imply publication.
+
+The optional `TicketBrowseAdapter`, `TicketContentAdapter`, `TicketAssetAdapter`
+and `TicketNavigationAdapter` ports declare `ticketing.browse`,
+`ticketing.content`, `ticketing.assets` and `ticketing.navigation`, respectively.
+All use `TicketBrowserModels.BrowserRequest`, the existing captured
+`TicketProviderAdapter.Access` and `TicketRequestGate`. Each operation validates
+source/space ownership, current access and request bounds; every outbound attempt
+uses gate admission. An anonymous source still supplies an access lease.
+
+`describe` advertises accepted query fields, lifecycle scopes, sorts, snapshot
+consistency and content/asset availability. Unsupported filters/sorts/scopes fail;
+never ignore them. `list` returns metadata-only `TicketSummary` items,
+`nextContinuation`, optional exact total, revision, captured time and effective
+query. Continuations are opaque provider state inside host-signed contexts; the
+host binds actor, space, source/config/access revisions, query, page size and
+expiry. No speculative totals, silent truncated scans or core page-local sorting.
+The literal NFC key/title profile uses case-insensitive substring matching.
+Filter families combine with AND; values within a family and labels use OR.
+Pages are 1–100 entries, default 50 chosen by the host. Text is at most 256
+characters, and provider continuation at most 4096 characters.
+
+`TicketRef` namespaces a stable opaque external ID by instance and external
+project. `displayKey` is presentation, never persistence identity. `Lifecycle`
+(ACTIVE, ARCHIVED, DRAFT) is independent of native status and canonical `Outcome`;
+CANCELLED is distinct from SUCCEEDED. `SourceRevision(kind,value,immutable)`
+contains an opaque full revision without assuming SHA-1. Summaries and optional
+`IssueObservation.sourceRevision` preserve provenance; absence cannot establish
+historical content. `detail` reads any authorized ticket, including one absent
+from observation storage.
+
+For `list` and `detail`, a null `BrowserRequest.revision` resolves the current source once and returns that captured revision; a non-null revision reads that exact revision without falling back, and browser `content` and `assets` require the pinned context.
+
+`content` returns transient Markdown/plain text, exact source revision and an
+asset/link manifest. Content is bounded to 1 MiB UTF-8 and 100 combined manifest
+entries. Asset IDs are opaque IDs, never URLs or filesystem paths. Asset support
+requires an immutable revision and `sha256:<64 lowercase hex>` digest of raw
+asset bytes, distinct from opaque repository object identity; every asset
+request must name that same revision and owning ticket. `TicketAsset` exposes
+ref/revision/metadata plus a closeable stream. The host enforces its configured
+byte/deadline/concurrency budget while consuming and always closes the resource.
+The SDK hard cap is 10 MiB per asset and 25 MiB loaded per view. No current
+HEAD fallback for an unavailable revision. A remote timestamp alone does not
+prove consistency. Providers lacking rich content retain navigation or hosted
+provider-link fallback; capability absence does not imply a failed observation.
+
+Full text, comments, rendered HTML and attachment bytes must never enter ticket
+observations, databases, persistent indexes, logs, disk spools or shared caches.
+The host uses bounded request-local buffers/streams and no-store authenticated
+responses. It validates MIME/download disposition, safe external URLs, manifest
+references, rendering and authorization immediately before release. The SDK DTO
+is not a sanitizer. `TicketContent.toString` redacts prose for diagnostics.
+
+`InstanceSource` adds optional `RepositorySource(repositoryId,ref,root,
+configurationPath,approvedAssetRoots,settings)`, retaining the hosted five-argument
+constructor. Repository sources have null API base URL and source kind
+REPOSITORY_SNAPSHOT. `sourceKinds` defaults to HOSTED_SERVICE; providers supporting
+repositories override it and validate their bounded inert non-secret settings in
+`validateRepositorySource`. Store namespace, parser/status/layout profile and
+format paths remain adapter settings, never core provider switches.
+
+`RepositoryContentHost.captureAccess` verifies the exact host catalog binding.
+Its access lease provides `context`, locked `current`, and `resolve(revision,gate)`;
+null resolves the configured ref once, while an immutable requested revision must
+be authorized and retained. `Snapshot.entries(root,max,gate)` recursively returns
+repository-relative entries completely or fails explicitly on scan limits.
+`open(path,maxBytes,gate)` returns exact-size/object-identity closeable blobs;
+reads remain confined to configured root, explicit configuration file and approved
+asset roots. Reject escapes, symlinks and submodules. No automatic LFS/submodule
+network reads, clone, hydration or working-tree access in a browser request.
+The host supplies synchronization freshness and content-capable repository policy.
+
+`normalizeReferenceCandidate` receives the complete bounded lexical token.
+Its default recognizes the legacy named key only; adapters may recognize richer
+whole tokens before project-specific `normalizeIssueKey` routing. Never truncate
+a dotted candidate to its numeric parent or infer a provider from a key prefix.
+
+The independent synthetic example implements all four browser capabilities with
+unobserved tickets, complete pagination, metadata filtering, separate cancellation,
+revision-bound Markdown/attachment and revoked-stream checks. The public testkit's
+`verifyBrowserContent` checks summary/document/manifest coherence. Neither needs
+private host source, provider credentials or a live service.
