@@ -1,6 +1,6 @@
 # Compatibility and scoped capabilities
 
-The SDK API level is `0.3`. During experimental `0.x` releases, the host requires an exact API-level match; `0.1` and `0.2` are incompatible even though its major is also zero. The SDK artifact version (`0.3.0-SNAPSHOT`) and adapter artifact version are independent release identifiers.
+The SDK API level is `0.4`. During experimental `0.x` releases, the host requires an exact API-level match; `0.1`, `0.2` and `0.3` are incompatible even though its major is also zero. The SDK artifact version (`0.4.0-SNAPSHOT`) and adapter artifact version are independent release identifiers.
 
 A provider product version describes a remote installation, while an API profile identifies the dialect implemented by an adapter. Neither is an SDK version. `ProviderVersion` compares parsed numeric components (`17.10` is newer than `17.9`); unrecognized vendor syntax remains unknown until the adapter normalizes it. `ProviderVersionRange` is a lower-inclusive, upper-exclusive comparison helper, not evidence that a feature exists.
 
@@ -44,3 +44,7 @@ exact 0.3 API level. Forge merge-request descriptions and existing write operati
 retain their behavior. Existing providers may remain observation/navigation-only;
 new optional ports do not require vendor feature parity. See the frozen signatures
 and operational rules in [CONTRACT.md](../CONTRACT.md).
+
+## The 0.4 boundary
+
+Version 0.4 retains the browser ports and adds optional empty-repository provisioning, exact repository lookup and post-publication default branch selection. Ticket commands add optional project templates and explicit named/ID version selectors while retaining legacy constructors and `fixVersions` behavior. Hosts, adapters, descriptors and artifact inventories must all declare API 0.4. These sources require a coordinated rebuild; earlier experimental API levels fail closed.
