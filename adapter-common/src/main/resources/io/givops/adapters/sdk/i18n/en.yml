@@ -20,3 +20,7 @@ forge.discoveryValues.sha256.unavailable: 'SHA-256 is unavailable.'
 forge.discoveryValues.a.canonical.positive.numeric.forge.id.is.required: 'A canonical positive numeric forge ID is required.'
 
 forge.forgeProperties.invalid.forge.resource.limits: 'Invalid forge resource limits'
+
+"ticketing.write.selector.invalid": "A version selector requires a kind and nonblank value."
+"ticketing.write.selector.mixed": "Use either legacy fixVersions or explicit versionSelectors."
+"forge.provisioning.default-branch.unsupported": "Default branch selection is unsupported."

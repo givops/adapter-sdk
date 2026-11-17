@@ -15,7 +15,7 @@ public final class ExampleDefinition implements TicketProviderDefinition {
     @Override public TicketProvider provider() { return PROVIDER; }
     @Override public String displayName() { return ExampleMessages.format("example.name"); }
     @Override public String adapterId() { return "io.givops.example.ticketing"; }
-    @Override public String adapterVersion() { return "0.3.0-SNAPSHOT"; }
+    @Override public String adapterVersion() { return "0.4.0-SNAPSHOT"; }
     @Override public List<String> capabilities() { return List.of("ticketing.read", "ticketing.browse", "ticketing.content", "ticketing.assets", "ticketing.navigation"); }
     @Override public List<String> apiProfiles() { return List.of("example-rest-v1"); }
     @Override public List<CredentialField> credentialFields() {
