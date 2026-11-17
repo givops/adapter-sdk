@@ -95,7 +95,12 @@ public final class TicketModels {
 
     public record VersionObservation(String externalVersionId, String name, boolean released, boolean archived,
                                      LocalDate releaseDate, Instant observedAt, String nativeState,
-                                     LocalDate startDate, Instant closedAt) {
+                                     LocalDate startDate, Instant closedAt, String canonicalName) {
+        public VersionObservation { canonicalName = canonicalName == null ? name : canonicalName; }
+        public VersionObservation(String externalVersionId, String name, boolean released, boolean archived,
+                                  LocalDate releaseDate, Instant observedAt, String nativeState, LocalDate startDate, Instant closedAt) {
+            this(externalVersionId, name, released, archived, releaseDate, observedAt, nativeState, startDate, closedAt, name);
+        }
         public VersionObservation(String externalVersionId, String name, boolean released, boolean archived,
                                   LocalDate releaseDate, Instant observedAt) {
             this(externalVersionId, name, released, archived, releaseDate, observedAt, null, null, null);

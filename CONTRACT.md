@@ -147,3 +147,36 @@ unobserved tickets, complete pagination, metadata filtering, separate cancellati
 revision-bound Markdown/attachment and revoked-stream checks. The public testkit's
 `verifyBrowserContent` checks summary/document/manifest coherence. Neither needs
 private host source, provider credentials or a live service.
+
+## Optional repository scope
+
+`ticketing.repository-scope` uses the independent `TicketRepositoryScopeAdapter`,
+`TicketScopedProviderAdapter`, `TicketScopedBrowseAdapter` and
+`TicketScopedReportAdapter` ports. A host selects each required port explicitly;
+missing scoped support must fail closed without invoking its legacy counterpart.
+Metadata fields expose stable IDs, COMPONENT/OPTION value kind, ONE/MANY
+cardinality, EQUALS/CONTAINS semantics and the existing capability states.
+Unavailable enumeration is distinct from a successful empty values list.
+
+`TicketScopeModels.Scope` captures the module binding ID, validated field,
+selected stable value ID, exact version prefix and policy/binding revisions.
+Discovery and activation validation are configuration operations; runtime reads
+must enforce the saved validated scope and returned membership without requiring
+Jira administration discovery. Each scoped observation call has exactly one
+project. Scoped ordinary calls have exactly one `OrdinaryProject`, whose
+`projectId` equals `Scope.bindingId`; result envelopes echo scope and attribution.
+OrdinaryProject's original four-argument constructor remains unshared.
+
+VersionObservation and OrdinaryVersion keep `name` as the native provider name
+and add `canonicalName`. Original constructors default canonicalName to name.
+A scoped adapter filters by the exact case-sensitive prefix, requires a nonempty
+suffix, and supplies the suffix as canonicalName while retaining native ID/name.
+ProjectQuery.releaseVersionName is a canonical input. Prefix mapping happens
+before version-selection callbacks. Form.providerVersionName previews the exact
+native command target; its original constructor retains unshared behavior.
+No issue bodies or arbitrary provider JSON belong in scope evidence or storage.
+
+Command receipts add nullable `versionName` (canonical local name) and
+`providerVersionName` (exact native target captured at admission). The original
+Command constructor remains available and leaves both names null for legacy
+receipts; hosts must not reconstruct old targets using current binding policy.

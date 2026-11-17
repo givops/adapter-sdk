@@ -35,6 +35,32 @@ class ExampleContractTest {
         public void check() { }
         public Duration remaining() { return Duration.ofSeconds(5); }
     };
+    @Test void scopedExampleCarriesBindingAttributionAndMapsVersionsBeforeSelection() {
+        var lease = AdapterTestkit.lease(Map.of("apiToken", "synthetic-token"), Map.of(), "one");
+        var base = new ExampleAdapter(request -> lease, AdapterTestkit.signer("synthetic-key-for-example-contract-test"), clock,
+                null, CapabilityInspection.State.AVAILABLE);
+        var scoped = new ExampleScopedReads(base);
+        var scope = new io.givops.ticketing.model.TicketScopeModels.Scope(UUID.randomUUID(),
+                new io.givops.ticketing.model.TicketScopeModels.Field("repository", "Repository",
+                        io.givops.ticketing.model.TicketScopeModels.ValueKind.OPTION,
+                        io.givops.ticketing.model.TicketScopeModels.Cardinality.ONE,
+                        io.givops.ticketing.model.TicketScopeModels.Match.EQUALS, CapabilityInspection.State.AVAILABLE, null),
+                "back", "Back ", 2, 3);
+        var query = new ProjectQuery(UUID.randomUUID(), "project-1", "EX", Set.of(), "1.0.0");
+        var access = base.captureAccess(source);
+        var result = scoped.readScoped(new ProviderInput(source, List.of(query), clock.instant()), scope, gate, access);
+        AdapterTestkit.verifyScopedSnapshot(scope, result);
+        assertThat(result.snapshot().projects().getFirst().versions()).singleElement().satisfies(version -> {
+            assertThat(version.name()).isEqualTo("Back 1.0.0"); assertThat(version.canonicalName()).isEqualTo("1.0.0");
+        });
+        var memberships = scoped.readVersionMembershipsScoped(source, query, scope, access, gate,
+                versions -> Set.of(versions.getFirst().externalVersionId()), 10, 100);
+        assertThat(memberships.scope()).isEqualTo(scope);
+        assertThat(memberships.memberships().members()).containsOnlyKeys("synthetic-Back 1.0.0");
+        lease.invalidate();
+        assertThatThrownBy(() -> scoped.readScoped(new ProviderInput(source, List.of(query), clock.instant()), scope, gate, access))
+                .isInstanceOf(TicketException.class);
+    }
     @Test void recognizesOnlyOwnedUrlSyntaxAndRejectsControlCharacters() {
         var definition = new ExampleDefinition();
         assertThat(definition.issueReference(URI.create("https://example.test/tickets/ex-12")))
