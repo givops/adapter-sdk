@@ -14,7 +14,7 @@ Capability IDs initially used: `ticketing.read`, `ticketing.version-membership`,
 
 Core endpoint: GET `/api/v2/catalog/ticketing-providers` returns `{items:[{provider,displayName,adapterId,adapterVersion,capabilities,apiProfiles,credentialFields,projectKeyPattern,externalIdPattern}]}`. Credential fields use `{name,label,type,required,maxLength}`, type TEXT or SECRET. New providers use generic ADAPTER_API credential payload `{fields:{key:value}}`; the host determines identity from the bound target.
 
-## Frozen API additions (0.2)
+## Earlier frozen additions (introduced in 0.2)
 
 `TicketProviderAdapter.current(InstanceSource, Access, boolean locked)` is required; implement it explicitly using the captured host lease. A context-only comparison is insufficient for locked publication.
 
@@ -40,6 +40,22 @@ Host-managed credential storage retains its 32 KiB encrypted envelope limit. The
 `ForgeProvider` is an open value identity. `ForgeAdapter`, `ForgeDiscoveryAdapter`, `ForgeApiProbe`, `ForgeRepositoryIdentity`, `ForgeCapabilityInspector` and `PipelineCommandProvider` are independently registered public capabilities. Their model packages are retained. `ForgeAdapter.Access` contains ephemeral credential fields and hosting; all remote requests require the supplied gate. Provider authentication header construction belongs only in the adapter. The core owns credentials, admission, freshness, snapshots and transactions. Canonical lifecycle/CI/conflict/reviewer metadata must be supplied by the adapter; the host does not infer it from vendor raw strings.
 
 `ForgeProviderDefinition` supplies hosting modes/default, repository identity validation, path and external-ID patterns, and an optional `commitPathTemplate` containing `{sha}`. `TicketProviderDefinition.commandLabels` describes native creation inputs/resources. `createProjectKeyPattern` and `validateCreateProjectKey` describe new-project slugs independently of bound project paths. The frontend uses these descriptors without provider-name branches.
+
+`ForgeGroupHierarchyAdapter` is an additive, optional capability (`forge.group-hierarchy`),
+independent of `ForgeDiscoveryAdapter` project/group support. `supports(provider, hosting)`
+declares implementation support without I/O. `subgroups(server, access, parentExternalId,
+query, limit, page, lastId, gate)` returns only direct children using the existing
+`RemotePage<RemoteGroup>` model; a partial page does not establish complete ancestry.
+`group(server, access, externalId, gate)` reads known ancestry metadata: the host must
+derive the ID from an admitted project/group or a preceding parent result in the same
+server/credential context, enforce traversal depth/object budgets, reject cycles and
+verify the complete path. It must never expose this method as arbitrary public-group
+ID discovery. Ancestor readability is not proof of membership. Providers independently
+enforce authenticated collection scope and project import eligibility; the host owns
+local group mappings, inherited-access policy and transactional import. The hierarchy
+capability changes no existing discovery/import DTO or required adapter method.
+This combined SDK uses exact API level 0.3; the browser API's host/adapter rebuild
+requirement below also applies to adapters implementing this optional capability.
 
 `VersionObservation.nativeState`, `startDate` and `closedAt` preserve native milestone state. `releaseDate` is the native due date for milestone providers; a closed milestone must not automatically become released. `IssueObservation.labels` preserves available native metadata. The deprecated `description` component is retained only for source migration; observation adapters must supply null and hosts must discard legacy values at read/persistence boundaries. Full ticket narratives belong exclusively in transient browser content. Forge merge-request descriptions are unchanged. The external issue ID is globally unique and stable within the configured instance; adapters without native global IDs must qualify it. The project ID describes current membership, preserving Jira identity across project moves. Local issue numbers remain scoped in issueKey.
 
