@@ -25,7 +25,12 @@ public final class TestReportProviderModels {
     @Schema(name="TestReportSourceProject")
     public record SourceProject(UUID ticketProjectId, String externalProjectId, String projectKey) { }
     @Schema(name="TestReportOrdinaryProject")
-    public record OrdinaryProject(UUID projectId, UUID ticketProjectId, String externalProjectId, String projectKey) { }
+    public record OrdinaryProject(UUID projectId, UUID ticketProjectId, String externalProjectId, String projectKey,
+                                  io.givops.ticketing.model.TicketScopeModels.Scope scope) {
+        public OrdinaryProject(UUID projectId, UUID ticketProjectId, String externalProjectId, String projectKey) {
+            this(projectId, ticketProjectId, externalProjectId, projectKey, null);
+        }
+    }
     @Schema(name="TestReportReportInput")
     public record ReportInput(InstanceSource source, List<SourceProject> sourceProjects, Set<String> issueTypeIds,
                               FieldMapping mapping, List<StatusRule> statuses, List<OrdinaryProject> ordinaryProjects) {
@@ -63,7 +68,13 @@ public final class TestReportProviderModels {
     }
     @Schema(name="TestReportOrdinaryVersion")
     public record OrdinaryVersion(UUID ticketProjectId, String externalVersionId, String name,
-                                  boolean released, boolean archived, LocalDate releaseDate) { }
+                                  boolean released, boolean archived, LocalDate releaseDate, String canonicalName) {
+        public OrdinaryVersion { canonicalName = canonicalName == null ? name : canonicalName; }
+        public OrdinaryVersion(UUID ticketProjectId, String externalVersionId, String name,
+                               boolean released, boolean archived, LocalDate releaseDate) {
+            this(ticketProjectId, externalVersionId, name, released, archived, releaseDate, name);
+        }
+    }
     @Schema(name="TestReportOrdinaryIssue")
     public record OrdinaryIssue(UUID ticketProjectId, String externalIssueId, String issueKey, String browseUrl,
                                 String summary, NamedId issueType, NamedId status, String statusCategory,

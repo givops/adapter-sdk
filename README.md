@@ -11,9 +11,9 @@ mvn -B clean install
 mvn -B -f examples/example-ticketing/pom.xml clean verify
 ```
 
-No database, private repository, credentials or live provider is required. Dependencies are resolved from the public Maven repositories configured by the Spring Boot parent. The supported baseline is Java 25, Spring Boot 4.0.9 and Jackson 3. This repository currently produces `0.4.0-SNAPSHOT` artifacts; do not assume they have been uploaded to Maven Central.
+No database, private repository, credentials or live provider is required. Dependencies are resolved from the public Maven repositories configured by the Spring Boot parent. The supported baseline is Java 25, Spring Boot 4.0.9 and Jackson 3. This repository currently produces `0.5.0-SNAPSHOT` artifacts; do not assume they have been uploaded to Maven Central.
 
-Use `io.givops:adapter-spring-boot:0.4.0-SNAPSHOT` for adapters and `io.givops:adapter-testkit:0.4.0-SNAPSHOT` in test scope. The five modules are `adapter-common`, `adapter-ticketing-api`, `adapter-forge-api`, `adapter-spring-boot` and `adapter-testkit`. Ticketing and forge contracts are separate domains in one SDK; the SDK itself is not a provider.
+Use `io.givops:adapter-spring-boot:0.5.0-SNAPSHOT` for adapters and `io.givops:adapter-testkit:0.5.0-SNAPSHOT` in test scope. The five modules are `adapter-common`, `adapter-ticketing-api`, `adapter-forge-api`, `adapter-spring-boot` and `adapter-testkit`. Ticketing and forge contracts are separate domains in one SDK; the SDK itself is not a provider.
 
 ## Write a provider
 

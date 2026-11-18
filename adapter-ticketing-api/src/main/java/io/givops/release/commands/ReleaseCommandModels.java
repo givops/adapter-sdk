@@ -25,7 +25,14 @@ public final class ReleaseCommandModels {
     public record Form(Capability capability, String context, UUID definitionId, UUID ticketProjectId,
                        String versionName, Kind kind, Action action, String assigneeAccountId,
                        String destinationProjectKey, List<Ticket> tickets, String ticketsState, ExistingReport existingReport,
-                       String description) {
+                       String description, String providerVersionName) {
+        public Form(Capability capability, String context, UUID definitionId, UUID ticketProjectId,
+                    String versionName, Kind kind, Action action, String assigneeAccountId,
+                    String destinationProjectKey, List<Ticket> tickets, String ticketsState, ExistingReport existingReport,
+                    String description) {
+            this(capability, context, definitionId, ticketProjectId, versionName, kind, action, assigneeAccountId,
+                    destinationProjectKey, tickets, ticketsState, existingReport, description, versionName);
+        }
         public Form { tickets = List.copyOf(tickets); }
     }
     @Schema(name = "ReleaseJiraCommandRequest")
@@ -38,7 +45,16 @@ public final class ReleaseCommandModels {
     @Schema(name = "ReleaseJiraCommand")
     public record Command(UUID id, UUID projectId, UUID definitionId, Action action, String state,
                           Instant createdAt, Instant completedAt, String versionId, String issueKey,
-                          String browseUrl, String summary, String errorCode, boolean refreshRequired) { }
+                          String browseUrl, String summary, String errorCode, boolean refreshRequired,
+                          String versionName, String providerVersionName) {
+        /** Legacy receipts have no captured version names; do not infer a native target from current configuration. */
+        public Command(UUID id, UUID projectId, UUID definitionId, Action action, String state,
+                       Instant createdAt, Instant completedAt, String versionId, String issueKey,
+                       String browseUrl, String summary, String errorCode, boolean refreshRequired) {
+            this(id, projectId, definitionId, action, state, createdAt, completedAt, versionId, issueKey,
+                    browseUrl, summary, errorCode, refreshRequired, null, null);
+        }
+    }
     @Schema(name = "ReleaseReportCreationConfiguration")
     public record Configuration(long revision, boolean enabled, UUID ordinaryTicketProjectId,
                                 UUID destinationTicketProjectId, String campaignIssueTypeId, String hotfixIssueTypeId,

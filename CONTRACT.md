@@ -1,8 +1,8 @@
-# Adapter SDK 0.4 contract
+# Adapter SDK 0.5 contract
 
 Java 25, Spring Boot 4.0.9 and its Jackson 3 baseline. Public types retain their existing package names to avoid unnecessary model remapping. All public modules build without GivOps private source.
 
-Providers depend on `io.givops:adapter-spring-boot:0.4.0-SNAPSHOT`. It exposes `adapter-ticketing-api`, `adapter-forge-api` and `adapter-common` transitively. Use Boot `AutoConfiguration.imports` to register a `TicketProviderDefinition` bean and capability beans (`TicketProviderAdapter`, optional `TicketWriteAdapter`, `TestReportProviderAdapter`, `ReleaseWriteAdapter`). Declare only implemented capabilities. Bean definitions must work without component scanning from the host. Publish the definition independently of runtime credential availability.
+Providers depend on `io.givops:adapter-spring-boot:0.5.0-SNAPSHOT`. It exposes `adapter-ticketing-api`, `adapter-forge-api` and `adapter-common` transitively. Use Boot `AutoConfiguration.imports` to register a `TicketProviderDefinition` bean and capability beans (`TicketProviderAdapter`, optional `TicketWriteAdapter`, `TestReportProviderAdapter`, `ReleaseWriteAdapter`). Declare only implemented capabilities. Bean definitions must work without component scanning from the host. Publish the definition independently of runtime credential availability.
 
 The host supplies `io.givops.adapters.CredentialHost`, `ContextSigner`, `Clock`, `JsonMapper`, `TicketProperties` and `TestReportProperties`. Adapter configuration may use its own public `@ConfigurationProperties` types. Host services never import provider concrete types.
 
@@ -18,7 +18,7 @@ Core endpoint: GET `/api/v2/catalog/ticketing-providers` returns `{items:[{provi
 
 `TicketProviderAdapter.current(InstanceSource, Access, boolean locked)` is required; implement it explicitly using the captured host lease. A context-only comparison is insufficient for locked publication.
 
-- `TicketProviderDefinition.sdkApiVersion(): String` defaults to `"0.4"`. The host calls `SdkCompatibility.requireCompatible(String)` and accepts this exact API level. This replaces the draft `sdkMajor()`; adapter artifact versions remain independent.
+- `TicketProviderDefinition.sdkApiVersion(): String` defaults to `"0.5"`. The host calls `SdkCompatibility.requireCompatible(String)` and accepts this exact API level. This replaces the draft `sdkMajor()`; adapter artifact versions remain independent.
 - `CredentialHost.capture(CredentialRequest)` and `CredentialLease.requireCurrent(boolean)` report expected host failures as `io.givops.adapters.CredentialAccessException`, with a public no-argument constructor and no private cause. Capture maps to provider `MISSING_CREDENTIALS`; revalidation maps to `SUPERSEDED`. Unexpected runtime failures are not caught indiscriminately.
 - `io.givops.adapters.i18n.MessageCatalog.load(Class<?> resourceOwner, String absoluteResourcePath)` loads one explicit artifact-owned YAML resource. `load(Map<String, InputStream>)`, `format(String, Map<String, ?>)` and `patterns()` are also public. Each adapter owns its facade and a unique resource path, for example `/io/givops/adapters/jira/i18n/en.yml`. Never import private `io.givops.i18n.Messages` or package the core catalog/index. English fallback, strict MF1 and cloned concurrent formatters are preserved. Provider queries are protocol constants, not translated messages.
 - `ReleaseWriteAdapter.WriteFailure(String code, boolean uncertain, String safeMessage)` permits adapter-owned sanitized text; the two-argument constructor remains available with an SDK message.
@@ -35,7 +35,7 @@ Host-managed credential storage retains its 32 KiB encrypted envelope limit. The
 
 ## Forge and shared registration
 
-`ProviderDefinition` owns artifact metadata, API profiles, credential fields and destination normalization. A combined JAR registers one `TicketProviderDefinition` and one `ForgeProviderDefinition`, with the same provider and artifact IDs. Its single `META-INF/givops-adapter.properties` declares `domains=ticketing,forge`, `sdkApiVersion=0.4`, and the provider, adapter ID and artifact version. Each declared domain must have exactly one registered definition. SDK 0.1, 0.2 and 0.3 binaries are rejected.
+`ProviderDefinition` owns artifact metadata, API profiles, credential fields and destination normalization. A combined JAR registers one `TicketProviderDefinition` and one `ForgeProviderDefinition`, with the same provider and artifact IDs. Its single `META-INF/givops-adapter.properties` declares `domains=ticketing,forge`, `sdkApiVersion=0.5`, and the provider, adapter ID and artifact version. Each declared domain must have exactly one registered definition. SDK 0.1, 0.2, 0.3 and 0.4 binaries are rejected.
 
 `ForgeProvider` is an open value identity. `ForgeAdapter`, `ForgeDiscoveryAdapter`, `ForgeApiProbe`, `ForgeRepositoryIdentity`, `ForgeCapabilityInspector` and `PipelineCommandProvider` are independently registered public capabilities. Their model packages are retained. `ForgeAdapter.Access` contains ephemeral credential fields and hosting; all remote requests require the supplied gate. Provider authentication header construction belongs only in the adapter. The core owns credentials, admission, freshness, snapshots and transactions. Canonical lifecycle/CI/conflict/reviewer metadata must be supplied by the adapter; the host does not infer it from vendor raw strings.
 
@@ -54,7 +54,7 @@ ID discovery. Ancestor readability is not proof of membership. Providers indepen
 enforce authenticated collection scope and project import eligibility; the host owns
 local group mappings, inherited-access policy and transactional import. The hierarchy
 capability changes no existing discovery/import DTO or required adapter method.
-This combined SDK uses exact API level 0.4; the browser API's host/adapter rebuild
+This combined SDK uses exact API level 0.5; the browser API's host/adapter rebuild
 requirement below also applies to adapters implementing this optional capability.
 
 `VersionObservation.nativeState`, `startDate` and `closedAt` preserve native milestone state. `releaseDate` is the native due date for milestone providers; a closed milestone must not automatically become released. `IssueObservation.labels` preserves available native metadata. The deprecated `description` component is retained only for source migration; observation adapters must supply null and hosts must discard legacy values at read/persistence boundaries. Full ticket narratives belong exclusively in transient browser content. Forge merge-request descriptions are unchanged. The external issue ID is globally unique and stable within the configured instance; adapters without native global IDs must qualify it. The project ID describes current membership, preserving Jira identity across project moves. Local issue numbers remain scoped in issueKey.
@@ -63,10 +63,10 @@ requirement below also applies to adapters implementing this optional capability
 
 ## Frozen read-only browser API (0.3)
 
-These browser contracts were introduced in API 0.3 and are retained by API 0.4.
-The current exact host/SDK/adapter level is 0.4; earlier API binaries are incompatible.
+These browser contracts were introduced in API 0.3 and are retained by API 0.5.
+The current exact host/SDK/adapter level is 0.5; earlier API binaries are incompatible.
 Old observation constructors remain source-compatible. Artifact version
-0.4.0-SNAPSHOT does not imply publication.
+0.5.0-SNAPSHOT does not imply publication.
 
 The optional `TicketBrowseAdapter`, `TicketContentAdapter`, `TicketAssetAdapter`
 and `TicketNavigationAdapter` ports declare `ticketing.browse`,
@@ -149,8 +149,46 @@ revision-bound Markdown/attachment and revoked-stream checks. The public testkit
 `verifyBrowserContent` checks summary/document/manifest coherence. Neither needs
 private host source, provider credentials or a live service.
 
+## API 0.5 repository scope
+
+`ticketing.repository-scope` uses the independent `TicketRepositoryScopeAdapter`,
+`TicketScopedProviderAdapter`, `TicketScopedBrowseAdapter` and
+`TicketScopedReportAdapter` ports. A host selects each required port explicitly;
+missing scoped support must fail closed without invoking its legacy counterpart.
+Metadata fields expose stable IDs, COMPONENT/OPTION value kind, ONE/MANY
+cardinality, EQUALS/CONTAINS semantics and the existing capability states.
+Unavailable enumeration is distinct from a successful empty values list.
+
+`TicketScopeModels.Scope` captures the module binding ID, validated field,
+selected stable value ID, exact version prefix and policy/binding revisions.
+Discovery and activation validation are configuration operations; runtime reads
+must enforce the saved validated scope and returned membership without requiring
+Jira administration discovery. Each scoped observation call has exactly one
+project. Scoped ordinary calls have exactly one `OrdinaryProject`, whose
+`projectId` equals `Scope.bindingId`; result envelopes echo scope and attribution.
+OrdinaryProject's original four-argument constructor remains unshared.
+
+VersionObservation and OrdinaryVersion keep `name` as the native provider name
+and add `canonicalName`. Original constructors default canonicalName to name.
+A scoped adapter filters by the exact case-sensitive prefix, requires a nonempty
+suffix, and supplies the suffix as canonicalName while retaining native ID/name.
+`ProjectQuery.releaseVersionName` is a canonical input. Prefix mapping happens
+before version-selection callbacks. Form.providerVersionName previews the exact
+native command target; its original constructor retains unshared behavior.
+No issue bodies or arbitrary provider JSON belong in scope evidence or storage.
+
+Command receipts add nullable `versionName` (canonical local name) and
+`providerVersionName` (exact native target captured at admission). The original
+Command constructor remains available and leaves both names null for legacy
+receipts; hosts must not reconstruct old targets using current binding policy.
 ## API 0.4 provisioning
 
 `ForgeProvisioningAdapter` is optional. Implementations create empty repositories with explicit owner/namespace selection and return authoritative IDs and canonical URLs. Exact lookup returns absence without creating, adopting, or modifying resources. Namespace creation is explicitly requested. Providers must reject unsupported default branch or visibility settings before writes. A caller must verify run ownership before resuming an existing resource. Installed definitions advertise `forge.repository-create`; runtime capability inspection retains credential/profile limitations.
 
-Ticket project commands add an optional `projectTemplateKey`. Issue commands add typed `versionSelectors` (`NAME` or `EXTERNAL_ID`); legacy `fixVersions` semantics remain provider-defined and their constructor remains available. Mixing the two forms is invalid. OPEN/DONE commands describe the resulting observed state; adapters may create then transition when required. Unsupported rich fields fail explicitly. API level 0.4 requires adapter definitions/manifests to declare 0.4.
+Ticket project commands add an optional `projectTemplateKey`. Issue commands add typed `versionSelectors` (`NAME` or `EXTERNAL_ID`); legacy `fixVersions` semantics remain provider-defined and their constructor remains available. Mixing the two forms is invalid. OPEN/DONE commands describe the resulting observed state; adapters may create then transition when required. Unsupported rich fields fail explicitly. These provisioning contracts were introduced in API 0.4 and are retained in API 0.5. Current adapter definitions/manifests must declare 0.5.
+
+Typed issue `VersionSelector.NAME` values are native provider names;
+`EXTERNAL_ID` values are opaque provider IDs. For a shared binding, the host maps
+a canonical NAME through its captured exact prefix before calling the generic
+write port. IDs must never be prefixed, and a native name must not be prefixed
+again. The read-only scoped ports do not alter generic issue command semantics.

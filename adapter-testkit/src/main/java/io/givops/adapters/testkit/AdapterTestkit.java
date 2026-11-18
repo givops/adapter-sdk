@@ -59,6 +59,17 @@ public final class AdapterTestkit {
                 != definition.credentialFields().size()) throw new AssertionError("Duplicate provider descriptor entries.");
     }
 
+    /** Checks that a scoped provider preserved the caller's binding attribution and exact prefix mapping. */
+    public static void verifyScopedSnapshot(io.givops.ticketing.model.TicketScopeModels.Scope expected,
+            io.givops.ticketing.model.TicketScopeModels.ScopedSnapshot result) {
+        if (!expected.equals(result.scope()) || result.snapshot().projects().size() != 1)
+            throw new AssertionError("Scoped snapshot lost its binding attribution.");
+        for (var version : result.snapshot().projects().getFirst().versions()) {
+            if (!java.util.Objects.equals(expected.canonicalName(version.name()), version.canonicalName())
+                    || version.canonicalName() == null) throw new AssertionError("Scoped version mapping is invalid.");
+        }
+    }
+
     /** Checks revision/content/manifest coherence without retaining text or reading asset bytes. */
     public static void verifyBrowserContent(io.givops.ticketing.model.TicketBrowserModels.TicketContent content,
                                             io.givops.ticketing.model.TicketBrowserModels.TicketSummary summary) {
