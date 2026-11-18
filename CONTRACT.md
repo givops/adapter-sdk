@@ -192,3 +192,7 @@ Typed issue `VersionSelector.NAME` values are native provider names;
 a canonical NAME through its captured exact prefix before calling the generic
 write port. IDs must never be prefixed, and a native name must not be prefixed
 again. The read-only scoped ports do not alter generic issue command semantics.
+
+## Optional ticket project lookup
+
+A provider advertising `ticketing.project-lookup` implements `TicketProjectLookupAdapter` on its ticket read adapter. The host supplies the selected instance, the project routing key, its captured read access and a request gate. The adapter returns only the provider's external project ID, matching routing key and display name. The host rechecks credential freshness before returning the suggestion. This operation reads an existing project and makes no registration or remote mutation. Providers without this capability continue to support manual registration.

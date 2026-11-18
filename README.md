@@ -17,6 +17,10 @@ Use `io.givops:adapter-spring-boot:0.5.0-SNAPSHOT` for adapters and `io.givops:a
 
 ## Write a provider
 
+To fill the external project ID and display name during registration, implement
+`TicketProjectLookupAdapter` and advertise `ticketing.project-lookup`.
+See the [project lookup contract](CONTRACT.md#optional-ticket-project-lookup).
+
 The [example](examples/example-ticketing) is a separate build with provider ID `EXAMPLE_TICKETS`. It registers a descriptor, credential fields, read adapter and optional capability inspector through Spring Boot `AutoConfiguration.imports`. It keeps observation acquisition metadata-only and independently exposes a synthetic browser with pagination, detail, revision-bound Markdown and attachments. It makes no live HTTP calls. Copy the structure, replace its provider implementation, and declare only capabilities you implement.
 
 Publish an artifact-owned `META-INF/givops-adapter.properties` containing `adapterId`, `provider`, `adapterVersion`, `sdkApiVersion` and `domains` (a comma-separated list such as `ticketing,forge`). Register the descriptor independently of the adapter's credential service to avoid a host/definition dependency cycle. See the exact contracts in [CONTRACT.md](CONTRACT.md).
