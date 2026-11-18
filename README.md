@@ -54,3 +54,13 @@ identity and routing. A bare `#123` is resolved against the selected bindings;
 Implement the definition's reference normalization rather than manufacturing a
 Jira-style key. Milestones retain their native state and dates; they are not Git
 releases or tags. Declare each optional operation only when implemented.
+
+
+## Local verification before merging
+
+Run `./scripts/verify-local.sh` on the final source with Java 25 and Maven 3.9+.
+It builds the public SDK, independent example, and release bundle locally; no provider account or private
+repository is required. Record the command and results before merging each PR.
+GitHub Actions is reserved for package releases; verification runs locally.
+`GIVOPS_MAVEN_REPOSITORY` selects an isolated Maven cache (default `.m2-local/`).
+Do not share a cache between concurrent snapshot builds.
