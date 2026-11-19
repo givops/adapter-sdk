@@ -13,7 +13,11 @@ public interface PipelineCommandProvider {
                            JsonNode defaultValue, List<JsonNode> options, String regex) {
         public InputDefinition { options = List.copyOf(options); }
     }
-    record Repository(ForgeProvider provider, URI baseUrl, String externalId, String path) {}
+    record Repository(ForgeProvider provider, URI baseUrl, String externalId, String path, java.util.UUID forgeId) {
+        public Repository(ForgeProvider provider, URI baseUrl, String externalId, String path) {
+            this(provider, baseUrl, externalId, path, null);
+        }
+    }
     record Result(String actualRef, String actualSha, String pipelineId, String webUrl, String errorCode,
                   boolean possiblyAccepted) {
         public static Result accepted(String actualRef, String actualSha, String pipelineId, String webUrl) {

@@ -1,5 +1,6 @@
 package io.givops.forge.admin;
 
+import io.givops.adapters.ConnectionFailure;
 import io.givops.forge.model.ForgeException;
 import io.givops.integrations.checks.CheckOperation;
 import io.givops.integrations.checks.CheckOutcome;
@@ -34,20 +35,22 @@ public final class ApiCheckOperations {
             if (observation == null) {
                 operations.add(new CheckOperation(name, OperationStatus.SUCCEEDED, null, evidence));
             } else {
-                fail(name, observation.status(), observation.errorCode());
+                String diagnostic = observation.httpStatus() == null ? null : ConnectionFailure.httpEvidence(
+                        observation.httpStatus(), observation.headers().firstValue("Content-Type").orElse(null));
+                fail(name, observation.status(), observation.errorCode(), diagnostic);
                 if (observation.errorCode().endsWith("_rate_limited")) retryAt = retry(observation.headers());
             }
         } catch (ConnectionCheckException exception) {
             if ("connection_check_superseded".equals(exception.getCode())) throw exception;
-            fail(name, OperationStatus.FAILED, exception.getCode());
+            fail(name, OperationStatus.FAILED, exception.getCode(), null);
         } catch (ForgeException exception) {
-            fail(name, OperationStatus.FAILED, exception.getCode());
+            fail(name, OperationStatus.FAILED, exception.getCode(), exception.diagnosticEvidence());
         }
     }
 
-    private void fail(String name, OperationStatus status, String error) {
+    private void fail(String name, OperationStatus status, String error, String diagnostic) {
         if (firstError == null) firstError = error;
-        operations.add(new CheckOperation(name, status, error, null));
+        operations.add(new CheckOperation(name, status, error, diagnostic));
         // Permission and availability may differ across the saved endpoints.
         stopped = !error.endsWith("_forbidden") && !error.endsWith("_not_found");
     }
@@ -84,5 +87,9 @@ public final class ApiCheckOperations {
         return now.plusSeconds(60);
     }
 
-    public record Observation(OperationStatus status, String errorCode, HttpHeaders headers) {}
+    public record Observation(OperationStatus status, String errorCode, HttpHeaders headers, Integer httpStatus) {
+        public Observation(OperationStatus status, String errorCode, HttpHeaders headers) {
+            this(status, errorCode, headers, null);
+        }
+    }
 }
