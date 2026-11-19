@@ -9,6 +9,16 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class ForgeContractsTest {
+    @Test void failedCheckRetainsResponseStatusWithoutProviderBodyOrCredentials() {
+        var operations = new io.givops.forge.admin.ApiCheckOperations(java.time.Instant.EPOCH);
+        var headers = java.net.http.HttpHeaders.of(Map.of("Content-Type", java.util.List.of("text/html; secret=hidden"),
+                "Location", java.util.List.of("https://user:password@example.test/")), (name, value) -> true);
+        operations.observe("metadata", "success", () -> new io.givops.forge.admin.ApiCheckOperations.Observation(
+                io.givops.integrations.checks.OperationStatus.FAILED, "provider_redirect", headers, 302));
+        assertThat(operations.outcome().operations().getFirst().evidence())
+                .contains("HTTP 302", "HTML").doesNotContain("secret", "hidden", "password");
+    }
+
     @Test void hierarchyIsOptionalAndDoesNotCoupleDiscoveryOperations() {
         ForgeDiscoveryAdapter adapter = new ProjectOnlyDiscovery();
         assertThat(adapter.supports(ForgeProvider.GITLAB, Hosting.SAAS,

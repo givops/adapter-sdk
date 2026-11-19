@@ -196,3 +196,17 @@ again. The read-only scoped ports do not alter generic issue command semantics.
 ## Optional ticket project lookup
 
 A provider advertising `ticketing.project-lookup` implements `TicketProjectLookupAdapter` on its ticket read adapter. The host supplies the selected instance, the project routing key, its captured read access and a request gate. The adapter returns only the provider's external project ID, matching routing key and display name. The host rechecks credential freshness before returning the suggestion. This operation reads an existing project and makes no registration or remote mutation. Providers without this capability continue to support manual registration.
+
+## Instance-scoped HTTPS and connection diagnostics
+
+Forge and ticket request gates may identify the saved connection through
+`connectionTarget()`. An adapter that wraps a gate forwards this target.
+Hosts can provide `ConnectionClients` to select an HTTPS client for that
+instance and request destination. Unregistered targets and hosts without the
+extension use the adapter's ordinary client. The host owns any custom clients.
+Adapter origin checks, redirect handling, timeouts and request budgets still apply.
+
+`ConnectionFailure` supplies bounded diagnostic text for network failures and
+HTTP status and media type. Forge checks carry this text in the existing
+operation evidence field. Credentials, provider bodies and arbitrary headers
+are excluded from this evidence.
