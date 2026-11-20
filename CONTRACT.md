@@ -35,6 +35,17 @@ Host-managed credential storage retains its 32 KiB encrypted envelope limit. The
 
 ## Forge and shared registration
 
+`OpenChangeRequestReader` is an optional, independent API 0.5 port advertised as
+`forge.open-change-requests`. `readOpenChangeRequests(Source, ForgeRequestGate,
+ForgeAdapter.Access)` returns every open, non-draft change request across all
+target branches using bounded collection requests only. It must not request
+metadata, individual change-request details, commit associations, pipelines,
+discussions or approvals. Pipeline and CI coverage remain UNKNOWN, including
+when list rows contain embedded pipeline data. A successful empty list is a
+complete observation; incomplete pagination, denied access and exhausted budgets
+must fail. Existing `ForgeAdapter` implementations require no new methods and
+their full snapshot behavior remains independent.
+
 `ProviderDefinition` owns artifact metadata, API profiles, credential fields and destination normalization. A combined JAR registers one `TicketProviderDefinition` and one `ForgeProviderDefinition`, with the same provider and artifact IDs. Its single `META-INF/givops-adapter.properties` declares `domains=ticketing,forge`, `sdkApiVersion=0.5`, and the provider, adapter ID and artifact version. Each declared domain must have exactly one registered definition. SDK 0.1, 0.2, 0.3 and 0.4 binaries are rejected.
 
 `ForgeProvider` is an open value identity. `ForgeAdapter`, `ForgeDiscoveryAdapter`, `ForgeApiProbe`, `ForgeRepositoryIdentity`, `ForgeCapabilityInspector` and `PipelineCommandProvider` are independently registered public capabilities. Their model packages are retained. `ForgeAdapter.Access` contains ephemeral credential fields and hosting; all remote requests require the supplied gate. Provider authentication header construction belongs only in the adapter. The core owns credentials, admission, freshness, snapshots and transactions. Canonical lifecycle/CI/conflict/reviewer metadata must be supplied by the adapter; the host does not infer it from vendor raw strings.
